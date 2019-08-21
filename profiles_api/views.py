@@ -1,10 +1,14 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework import  viewsets
+from rest_framework import viewsets
+from rest_framework.authentication import TokenAuthentication
 # from rest_framework.renderers import JSONRenderer
 
 from profiles_api import serializers
+from profiles_api import models
+from profiles_api import permission
+
 
 class HelloApiView(APIView):
     """Test APIView"""
@@ -13,17 +17,17 @@ class HelloApiView(APIView):
 
     # renderer_classes = [JSONRenderer]
 
-    def get(self,request,format=None):
+    def get(self, request, format=None):
         """Return a list of APIView features"""
 
-        an_apiview=[
-        'Demo of api view',
-        'is similar to traditional django view'
+        an_apiview = [
+            'Demo of api view',
+            'is similar to traditional django view'
         ]
 
-        return Response({'messages':'Get','an_apiview':an_apiview})
+        return Response({'messages': 'Get', 'an_apiview': an_apiview})
 
-    def post(self,request):
+    def post(self, request):
         """Create a hello messages with our name"""
 
         # serializer_class is function in APIView to retrive the
@@ -31,29 +35,30 @@ class HelloApiView(APIView):
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
-            name = serializer.validated_data.get('name')  #retrive the name from validated data
+            # retrive the name from validated data
+            name = serializer.validated_data.get('name')
             message = f'Hello {name}'
-            return Response({'message':message})
+            return Response({'message': message})
         else:
             return Response(
-            serializer.errors,
-            status = status.HTTP_400_BAD_REQUEST
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
             )
 
-    def put(self,request,pk=None):
+    def put(self, request, pk=None):
         """ Handle Updating an object"""
 
-        return Response({'method':'put'})
+        return Response({'method': 'put'})
 
-    def patch(self,request,pk=None):
+    def patch(self, request, pk=None):
         """Handle a partial update of an object"""
 
-        return Response({'method':'patch'})
+        return Response({'method': 'patch'})
 
-    def delete(self,request,pk=None):
+    def delete(self, request, pk=None):
         """delete an object"""
 
-        return Response({'method':'delete'})
+        return Response({'method': 'delete'})
 
 
 class HelloViewset(viewsets.ViewSet):
@@ -61,20 +66,21 @@ class HelloViewset(viewsets.ViewSet):
 
     serializer_class = serializers.HelloSerializer
 
-    def list(self,request):
+    def list(self, request):
         """Return a hello message"""
 
-        a_viewset=['User actions (list,Create,retrive,update,patial update)',
-                    'Authomatically maps with Routers',
-                    'Provide more functionality with less code',
-        ]
+        a_viewset = ['User actions (list,Create,retrive,update,patial update)',
+                     'Authomatically maps with Routers',
+                     'Provide more functionality with less code',
+                     ]
 
-        return Response({'message': 'Hello!', 'a_viewset':a_viewset})
+        return Response({'message': 'Hello!', 'a_viewset': a_viewset})
 
-    def create(self,request):
+    def create(self, request):
         """Create a new line hello message"""
 
-        serializer = self.serializer_class(data=request.data)  # Inside the method accessing serializer_class so use self.serializer_class
+        # Inside the method accessing serializer_class so use self.serializer_class
+        serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
             name = serializer.validated_data.get('name')
@@ -105,3 +111,13 @@ class HelloViewset(viewsets.ViewSet):
         """Handle removing an object"""
 
         return Response({'http_method': 'DELETE'})
+
+
+class UserProfileViewSet(viewsets.ModelViewSet):
+    """Handle creating and updating profile"""
+
+    serializer_class = serializers.UserProfileSerializer
+    queryset = models.UserProfile.objects.all()
+    # we can configure more authentication class by adding below
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (permission.UpdateOwnProfile,)
