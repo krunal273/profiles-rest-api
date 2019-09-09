@@ -25,7 +25,7 @@ SECRET_KEY = '-gemc^ty4^r)h@he7*h6y#7^w0#%e5pyj*hzkvb)m1!&05gkhs'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [djangorestframework.netlify.com]
 
 
 # Application definition
